@@ -11,3 +11,7 @@
 *.lai
 *.la
 *.a
+
+# Editor's files
+*.swp
+*~
