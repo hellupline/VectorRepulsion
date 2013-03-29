@@ -6,26 +6,22 @@
 #include "dirVector.h"
 #include "mapLearning.h"
 
-#define D_MEASURE_REDUCTION 200
+#define D_MEASURE_REDUCTION 100
 #define D_MAP_SIZE 500
 #define D_HALF_SONAR 10
 
-#define D_SONAR_NOISE_THRHOLD 4000
-#define D_EFFECT_RADIUS 50
-#define D_EFFECT_NOISE_THRHOLD 0
+#define D_SONAR_NOISE_THRHOLD 3000
+#define D_EFFECT_RADIUS 15
+#define D_EFFECT_NOISE_THRHOLD 1
 
-#define D_K1 2
-#define D_K2 0.25
+#define D_K1 20.0
+#define D_K2 1.0
 
 using namespace std;
 
-inline bool arrived(dirVector dest, ArRobot& robot) {
-    return (dest.x == robot.getX() && dest.y == robot.getY());
-}
-inline dirVector robot_is_here(ArRobot& robot) {
-    return dirVector(robot.getX()/D_MEASURE_REDUCTION, robot.getY()/D_MEASURE_REDUCTION, robot.getTh());
-}
-
+/**************************************************************************/
+inline int quickRound(float a) { return (int) a; }
+inline bool arrived(dirVector dest, ArRobot& robot) { return (dest.x == robot.getX() && dest.y == robot.getY()); }
 inline std::vector<int> sonar_reduction(ArRobot& robot) {
     std::vector<int> reduced;
     unsigned int n_sonar = robot.getNumSonar();
@@ -33,6 +29,9 @@ inline std::vector<int> sonar_reduction(ArRobot& robot) {
         reduced.push_back(robot.getSonarRange(i)/D_MEASURE_REDUCTION);
     return reduced;
 }
+inline dirVector robot_is_here(ArRobot& robot) { return dirVector(robot.getX()/D_MEASURE_REDUCTION, robot.getY()/D_MEASURE_REDUCTION, robot.getTh()); }
+inline void printVector(dirVector& v) { cout << "(" << quickRound(v.x) << "," << quickRound(v.y) << "," << quickRound(v.z) << ") "; }
+/**************************************************************************/
 
 int main(int argc, char **argv) {
 /**************************************************************************/
@@ -70,6 +69,7 @@ int main(int argc, char **argv) {
 /**************************************************************************/
     mapLearning histogram_map(D_MAP_SIZE, D_MEASURE_REDUCTION, D_HALF_SONAR, D_SONAR_NOISE_THRHOLD, D_EFFECT_RADIUS, D_EFFECT_NOISE_THRHOLD, D_K1, D_K2);
     dirVector d_list[] = {dirVector(D_MAP_SIZE, D_MAP_SIZE, 0)};
+    //dirVector d_list[] = {dirVector(D_MAP_SIZE, D_MAP_SIZE>>1, 0)};
     for(int d_index=0; d_index < 1; d_index++) {
         while (!arrived(d_list[d_index], robot)) {
             dirVector pose=robot_is_here(robot);
@@ -83,17 +83,16 @@ int main(int argc, char **argv) {
 
             if (speed < 1) {
             } else {
-                robot.move(10);
-                robot.setHeading(angle+pose.z);
+                robot.move(50);
+                robot.setDeltaHeading(angle);
             }
 
-            cout << "angle: " << angle << " ";
-            cout << "speed: " << speed << " ";
-            cout << "vector: " << v.x << "," << v.y << "," << v.z << " ";
-            cout << "pose: " << pose.x << "," << pose.y << "," << pose.z << " ";
+            cout << "angle: " << quickRound(angle) << " " << "speed: " << quickRound(speed) << " ";
+            cout << "pose: "; printVector(pose);
+            cout << "vector: "; printVector(v);
             cout << "sonar: " << sonar[0] << "," << sonar[1] << "," << sonar[2] << "," << sonar[3] << "," << sonar[4] << "," << sonar[5] << "," << sonar[6] << "," << sonar[7] << " ";
             cout << endl;
-            ArUtil::sleep(1000);
+            ArUtil::sleep(125);
         }
     }
 /**************************************************************************/
@@ -101,4 +100,5 @@ int main(int argc, char **argv) {
     robot.stopRunning();
     robot.waitForRunExit();
     Aria::exit(0);
+/**************************************************************************/
 }

@@ -6,7 +6,7 @@
 #include "dirVector.h"
 #include "mapLearning.h"
 
-mapLearning::mapLearning(int _MAP_SIZE, int _MEASURE_REDUCTION, int _HALF_SONAR, int _SONAR_NOISE_THRHOLD, int _EFFECT_RADIUS, int _EFFECT_NOISE_THRHOLD, int _K1, int _K2) {
+mapLearning::mapLearning(float _MAP_SIZE, float _MEASURE_REDUCTION, float _HALF_SONAR, float _SONAR_NOISE_THRHOLD, float _EFFECT_RADIUS, float _EFFECT_NOISE_THRHOLD, float _K1, float _K2) {
     MAP_SIZE = _MAP_SIZE;
     MEASURE_REDUCTION = _MEASURE_REDUCTION;
     HALF_SONAR = _HALF_SONAR;
@@ -21,10 +21,11 @@ mapLearning::mapLearning(int _MAP_SIZE, int _MEASURE_REDUCTION, int _HALF_SONAR,
 
 void mapLearning::render(dirVector pose, std::vector<int> sonar) {
     int angle[] = {90, 50, 30, 10, -10, -30, -50, -90};
+    //int angle[] = {-90, -50, -30, -10, 10, 30, 50, 90};
     rect search(0, 0, 1, 1);
     std::vector<xy*> points;
     for(int i=0; i < 8; i++) {
-        if (sonar[i] > SONAR_NOISE_THRHOLD/MEASURE_REDUCTION) {
+        if (sonar[i] < SONAR_NOISE_THRHOLD/MEASURE_REDUCTION) {
             for(int j=pose.z+angle[i]-HALF_SONAR; j < pose.z+angle[i]+HALF_SONAR; j++) {
                 search.x = pose.x + sonar[i]*cos(radians(j));
                 search.y = pose.y + sonar[i]*sin(radians(j));
@@ -41,27 +42,26 @@ void mapLearning::render(dirVector pose, std::vector<int> sonar) {
 }
 
 dirVector mapLearning::vector(dirVector origin, dirVector dest) {
-    rect search(origin.x-(EFFECT_RADIUS>>1), origin.y-(EFFECT_RADIUS>>1), EFFECT_RADIUS, EFFECT_RADIUS);
+    rect search(origin.x-(EFFECT_RADIUS/2), origin.y-(EFFECT_RADIUS/2), EFFECT_RADIUS, EFFECT_RADIUS);
     //rect search(0, 0, MAP_SIZE, MAP_SIZE);
     std::vector<xy*> r_points= histogramMap->queryRange(search);
     std::vector<dirVector> r_vectors;
 
-    dirVector v, w, d;
+    dirVector v;
     int m;
     for(unsigned int i=0; i < r_points.size(); i++) {
-        dirVector(r_points[i]->x, r_points[i]->y, 0);
-
-        v = vectorSub(origin, w);
-        m = vectorMod(v);
-
-        if (m > 0)
-            r_vectors.push_back(vectorMulS(v, K1*exp(-m*K2)/m));
+        if (r_points[i]->value > EFFECT_NOISE_THRHOLD) {
+            v = dirVector(r_points[i]->x, r_points[i]->y, 0);
+            v = vectorSub(origin, v);
+            m = vectorMod(v);
+            if (m > 0)
+                r_vectors.push_back(vectorMulS(v, K1*exp(-m*K2)/m));
+        }
     }
 
-    d = vectorSub(dest, origin);
-    d = vectorMulS(d, 20/vectorMod(d));
+    v = vectorSub(dest, origin);
+    v = vectorMulS(v, 20/vectorMod(v));
     for(unsigned int i=0; i < r_vectors.size(); i++)
-        d = vectorSum(d, r_vectors[i]);
-
-    return d;
+        v = vectorSum(v, r_vectors[i]);
+    return v;
 }
