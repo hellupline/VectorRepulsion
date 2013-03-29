@@ -31,5 +31,5 @@ class quadTree {
         bool subDivide();
         void resize(rect newBounds);
         void delChildren();
-        std::vector<xy*>* queryRange(rect& range, std::vector<xy*>* pointsInRange=nullptr);
+        std::vector<xy*> queryRange(rect& range);
 };

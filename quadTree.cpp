@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 
 #include "quadTree.h"
@@ -72,22 +73,35 @@ void quadTree::resize(rect newBounds) {
         se->resize(rect(bounds.x + (bounds.w >> 1), bounds.y + (bounds.h >> 1), bounds.w >> 1, bounds.h >> 1));
 }
 
-std::vector<xy*>* quadTree::queryRange(rect& range, std::vector<xy*>* pointsInRange) {
-    if (!bounds.intersects(range))
-        return nullptr;
+void AddGroup(std::vector<xy*>& vtr, std::vector<xy*>& toAdd) {
+	for (unsigned int i = 0; i < toAdd.size(); i++)
+		vtr.push_back(toAdd[i]);
+}
 
-    if (pointsInRange == nullptr)
-       pointsInRange = new std::vector<xy*>;
+std::vector<xy*> quadTree::queryRange(rect& range) {
+	std::vector<xy*> pointsInRange;
 
-    for (int i=0; i < sz; i++)
-        if (range.contains(points[i]))
-            pointsInRange->push_back(&points[i]);
+	if (!bounds.intersects(range))
+		return pointsInRange;
 
-    if (nw != nullptr) {
-        nw->queryRange(range, pointsInRange);
-        ne->queryRange(range, pointsInRange);
-        sw->queryRange(range, pointsInRange);
-        se->queryRange(range, pointsInRange);
+    for (int p = 0; p < sz; p++)
+		if (range.contains(points[p]))
+			pointsInRange.push_back(&points[p]);
+
+	if (nw != nullptr) {
+        std::vector<xy*> tmp;
+
+        tmp = nw->queryRange(range);
+        AddGroup(pointsInRange, tmp);
+
+        tmp = ne->queryRange(range);
+        AddGroup(pointsInRange, tmp);
+
+        tmp = sw->queryRange(range);
+        AddGroup(pointsInRange, tmp);
+
+        tmp = se->queryRange(range);
+        AddGroup(pointsInRange, tmp);
     }
     return pointsInRange;
 }
