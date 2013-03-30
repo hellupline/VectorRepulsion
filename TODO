@@ -1,0 +1,6 @@
+CHANGE PARTICLES SELECTOR
+    actual: every pixel in map
+    new: chunks of pixels
+        vector modulus <- amouth, distance, chunk value
+        chunk value=(to be determined)
+
