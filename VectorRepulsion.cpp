@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <math.h>
 #include <Aria.h>
 
 #include "quadTree.h"
@@ -20,7 +21,6 @@
 using namespace std;
 
 /**************************************************************************/
-inline int quickRound(float a) { return (int) a; }
 inline bool arrived(dirVector dest, ArRobot& robot) { return (dest.x == robot.getX() && dest.y == robot.getY()); }
 inline std::vector<int> sonar_reduction(ArRobot& robot) {
     std::vector<int> reduced;
@@ -30,7 +30,7 @@ inline std::vector<int> sonar_reduction(ArRobot& robot) {
     return reduced;
 }
 inline dirVector robot_is_here(ArRobot& robot) { return dirVector(robot.getX()/D_MEASURE_REDUCTION, robot.getY()/D_MEASURE_REDUCTION, robot.getTh()); }
-inline void printVector(dirVector& v) { cout << "(" << quickRound(v.x) << "," << quickRound(v.y) << "," << quickRound(v.z) << ") "; }
+inline void printVector(dirVector& v) { cout << "(" << round(v.x) << "," << round(v.y) << "," << round(v.z) << ") "; }
 /**************************************************************************/
 
 int main(int argc, char **argv) {
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
                 robot.setDeltaHeading(angle);
             }
 
-            cout << "angle: " << quickRound(angle) << " " << "speed: " << quickRound(speed) << " ";
+            cout << "angle: " << round(angle) << " " << "speed: " << round(speed) << " ";
             cout << "pose: "; printVector(pose);
             cout << "vector: "; printVector(v);
             cout << "sonar: " << sonar[0] << "," << sonar[1] << "," << sonar[2] << "," << sonar[3] << "," << sonar[4] << "," << sonar[5] << "," << sonar[6] << "," << sonar[7] << " ";

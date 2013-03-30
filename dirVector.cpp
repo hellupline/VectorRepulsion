@@ -1,9 +1,9 @@
 #include <iostream>
+#include <vector>
 #include <math.h>
 
 #include "dirVector.h"
 
-float round(float n) { return n; }
 float degrees(float a) { return a*180.0/3.1415926; }
 float radians(float a) { return a*3.1415926/180.0; }
 dirVector vectorSum(dirVector& a, dirVector& b) { return dirVector(a.x+b.x, a.y+b.y, a.z+b.z); }
