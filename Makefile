@@ -3,7 +3,7 @@ LDLIBS=-lAria -lpthread -ldl -L/home/hellupline/.AppCenter/apps/Aria/lib `pkg-co
 
 #TARGET=VectorRepulsion
 TARGET=VectorRepulsion
-OBJS=quadTree.o dirVector.o mapLearning.o
+OBJS=quadTree.o dirVector.o mapLearning.o mapRender.o
 
 all: $(TARGET)
 $(TARGET): $(OBJS)
