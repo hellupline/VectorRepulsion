@@ -46,17 +46,16 @@ void render(quadTree& map, rect area, dirVector pose, dirVector vector, int radi
     std::vector<xy*> particles = map.queryRange(area);
     for (unsigned int i=0; i < particles.size(); i++) {
         if (particles[i]->value == 0) {
-            img(particles[i]->x-area.x, particles[i]->y-area.y) = Vec3b(0,0,0);
+            img(particles[i]->y-area.y, particles[i]->x-area.x) = Vec3b(0,0,0);
         } else {
-            hsv2rgb(particles[i]->value*10, &r, &g, &b);
-            img(particles[i]->x-area.x, particles[i]->y-area.y) = Vec3b(r,g,b);
+            hsv2rgb(particles[i]->value, &r, &g, &b);
+            img(particles[i]->y-area.y, particles[i]->x-area.x) = Vec3b(r,g,b);
         }
     }
-    transpose(img, img); flip(img, img, 0);
-    transpose(img, img); flip(img, img, 0);
-
-    line(img, Point(area.h/2, area.w/2), Point(vector.x, vector.y), Scalar(0, 255, 0), 1, 8);
     ellipse(img, Point(area.h/2, area.w/2), Size(radius/2, radius/2), 0, 0, 360, Scalar(0, 0, 255), 1, 8);
+    line(img, Point(area.h/2, area.w/2), Point(vector.x+(area.w/2), vector.y+(area.h/2)), Scalar(0, 255, 0), 1, 8);
+
+    flip(img, img, 0); transpose(img, img); flip(img, img, 0); // 1: fix orentation, 2-3, rotate 90 degress
 
     imshow("mapRender", img);
     waitKey(1);

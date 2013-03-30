@@ -6,17 +6,35 @@
 #include "dirVector.h"
 #include "mapLearning.h"
 
-mapLearning::mapLearning(float _MAP_SIZE, float _MEASURE_REDUCTION, float _HALF_SONAR, float _SONAR_NOISE_THRHOLD, float _EFFECT_RADIUS, float _EFFECT_NOISE_THRHOLD, float _K1, float _K2) {
-    MAP_SIZE = _MAP_SIZE;
+#define D_MEASURE_REDUCTION 50.0
+#define D_MAP_SIZE 1000
+
+#define D_EFFECT_THRHOLD 2
+#define D_SONAR_NOISE_THRHOLD 3000
+#define D_EFFECT_RADIUS 1500/D_MEASURE_REDUCTION
+
+#define D_K1 25.0
+#define D_K2 1.0
+
+#define D_SONAR_HALF_POLAR_DISTANCE 10
+
+mapLearning::mapLearning(float _MEASURE_REDUCTION, float _MAP_SIZE, float _EFFECT_THRHOLD, float _SONAR_NOISE_THRHOLD, float _EFFECT_RADIUS, float _K1, float _K2, float _SONAR_HALF_POLAR_DISTANCE) {
     MEASURE_REDUCTION = _MEASURE_REDUCTION;
-    HALF_SONAR = _HALF_SONAR;
+    MAP_SIZE = _MAP_SIZE;
+    EFFECT_THRHOLD = _EFFECT_THRHOLD;
     SONAR_NOISE_THRHOLD = _SONAR_NOISE_THRHOLD;
     EFFECT_RADIUS = _EFFECT_RADIUS;
-    EFFECT_NOISE_THRHOLD = _EFFECT_NOISE_THRHOLD;
     K1 = _K1;
     K2 = _K2;
+    SONAR_HALF_POLAR_DISTANCE = _SONAR_HALF_POLAR_DISTANCE;
 
     histogramMap = new quadTree(rect(0, 0, MAP_SIZE, MAP_SIZE));
+}
+
+void mapLearning::renderPrecise(std::vector<xy> sonar) {
+    for (unsigned int i=0; i < sonar.size(); i++)
+        histogramMap->insert(sonar[i]);
+    //CHEATER MODE :)
 }
 
 void mapLearning::render(dirVector pose, std::vector<int> sonar) {
@@ -26,7 +44,7 @@ void mapLearning::render(dirVector pose, std::vector<int> sonar) {
     std::vector<xy*> points;
     for(int i=0; i < 8; i++) {
         if (sonar[i] < SONAR_NOISE_THRHOLD/MEASURE_REDUCTION) {
-            for(int j=pose.z+angle[i]-HALF_SONAR; j < pose.z+angle[i]+HALF_SONAR; j++) {
+            for(int j=pose.z+angle[i]-SONAR_HALF_POLAR_DISTANCE; j < pose.z+angle[i]+SONAR_HALF_POLAR_DISTANCE; j++) {
                 search.x = pose.x + sonar[i]*cos(radians(j));
                 search.y = pose.y + sonar[i]*sin(radians(j));
                 points = histogramMap->queryRange(search);
@@ -43,14 +61,13 @@ void mapLearning::render(dirVector pose, std::vector<int> sonar) {
 
 dirVector mapLearning::vector(dirVector origin, dirVector dest) {
     rect search(origin.x-(EFFECT_RADIUS/2), origin.y-(EFFECT_RADIUS/2), EFFECT_RADIUS, EFFECT_RADIUS);
-    //rect search(0, 0, MAP_SIZE, MAP_SIZE);
     std::vector<xy*> r_points= histogramMap->queryRange(search);
     std::vector<dirVector> r_vectors;
 
     dirVector v;
     int m;
     for(unsigned int i=0; i < r_points.size(); i++) {
-        if (r_points[i]->value > EFFECT_NOISE_THRHOLD) {
+        if (r_points[i]->value > EFFECT_THRHOLD) {
             v = dirVector(r_points[i]->x, r_points[i]->y, 0);
             v = vectorSub(origin, v);
             m = vectorMod(v);
@@ -60,7 +77,8 @@ dirVector mapLearning::vector(dirVector origin, dirVector dest) {
     }
 
     v = vectorSub(dest, origin);
-    v = vectorMulS(v, 20/vectorMod(v));
+    v = vectorMulS(v, 1/vectorMod(v));
+    //v = vectorMulS(v, EFFECT_RADIUS/vectorMod(v));
     for(unsigned int i=0; i < r_vectors.size(); i++)
         v = vectorSum(v, r_vectors[i]);
     return v;
