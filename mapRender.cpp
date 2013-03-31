@@ -52,7 +52,7 @@ void render(quadTree& map, rect area, dirVector pose, dirVector vector, int radi
             img(particles[i]->y-area.y, particles[i]->x-area.x) = Vec3b(r,g,b);
         }
     }
-    ellipse(img, Point(area.h/2, area.w/2), Size(radius/2, radius/2), 0, 0, 360, Scalar(0, 0, 255), 1, 8);
+    ellipse(img, Point(area.h/2, area.w/2), Size(radius*2, radius*2), 0, 0, 360, Scalar(0, 0, 255), 1, 8);
     line(img, Point(area.h/2, area.w/2), Point(vector.x+(area.w/2), vector.y+(area.h/2)), Scalar(0, 255, 0), 1, 8);
 
     flip(img, img, 0); transpose(img, img); flip(img, img, 0); // 1: fix orentation, 2-3, rotate 90 degress

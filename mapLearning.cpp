@@ -60,7 +60,7 @@ void mapLearning::render(dirVector pose, std::vector<int> sonar) {
 }
 
 dirVector mapLearning::vector(dirVector origin, dirVector dest) {
-    rect search(origin.x-(EFFECT_RADIUS/2), origin.y-(EFFECT_RADIUS/2), EFFECT_RADIUS, EFFECT_RADIUS);
+    rect search(origin.x-(EFFECT_RADIUS), origin.y-(EFFECT_RADIUS), EFFECT_RADIUS*2, EFFECT_RADIUS*2);
     std::vector<xy*> r_points= histogramMap->queryRange(search);
     std::vector<dirVector> r_vectors;
 
@@ -77,8 +77,7 @@ dirVector mapLearning::vector(dirVector origin, dirVector dest) {
     }
 
     v = vectorSub(dest, origin);
-    v = vectorMulS(v, 1/vectorMod(v));
-    //v = vectorMulS(v, EFFECT_RADIUS/vectorMod(v));
+    v = vectorMulS(v, K1/vectorMod(v));
     for(unsigned int i=0; i < r_vectors.size(); i++)
         v = vectorSum(v, r_vectors[i]);
     return v;
