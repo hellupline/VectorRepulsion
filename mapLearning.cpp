@@ -72,12 +72,14 @@ dirVector mapLearning::vector(dirVector origin, dirVector dest) {
             v = vectorSub(origin, v);
             m = vectorMod(v);
             if (m > 0)
-                r_vectors.push_back(vectorMulS(v, K1*exp(-m*K2)/m));
+                r_vectors.push_back(vectorMulS(v,
+                            K1*exp(-m*K2)/r_points.size()
+                ));
         }
     }
 
     v = vectorSub(dest, origin);
-    v = vectorMulS(v, K1/vectorMod(v));
+    //v = vectorMulS(v, K1/vectorMod(v));
     for(unsigned int i=0; i < r_vectors.size(); i++)
         v = vectorSum(v, r_vectors[i]);
     return v;
