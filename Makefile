@@ -1,13 +1,14 @@
-CXXFLAGS=-std=c++0x -Wall -O2 -I/home/hellupline/.AppCenter/apps/Aria/include `pkg-config --cflags opencv`
-LDLIBS=-lAria -lpthread -ldl -L/home/hellupline/.AppCenter/apps/Aria/lib `pkg-config --libs opencv`
+CXXFLAGS=-std=c++0x -Wall -O2 `pkg-config --cflags opencv`
+LDLIBS=`pkg-config --libs opencv`
+CC=g++
+STRIP=strip
 
-#TARGET=VectorRepulsion
+SOURCES=quadTree.cc dirVector.cc mapLearning.cc mapRender.cc
 TARGET=VectorRepulsion
-OBJS=quadTree.o dirVector.o mapLearning.o mapRender.o
+OBJS=$(SOURCES:.cc=.o)
 
 all: $(TARGET)
 $(TARGET): $(OBJS)
-
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS)
 
